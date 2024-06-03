@@ -8,7 +8,7 @@ export class AppController {
   }
   constructor(private readonly appService: AppService) { }
 
-  
+
   @Get('')
   async table(@Res() res: Response) {
     return res.redirect('/auth/loginWeb')
