@@ -6,7 +6,7 @@ import * as bcrypt from 'bcrypt';
 export class AuthService {
     constructor(
         private userInfoService: UserInfoService,
-        
+
     ) { }
     async signIn(request: any) {
         const { email, password } = request;
@@ -20,7 +20,7 @@ export class AuthService {
         }
         return {
             user,
-            status:true,
+            status: true,
         };
     }
 }

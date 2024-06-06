@@ -13,10 +13,7 @@ import { UserInfoRegisterResponseDTO } from './dto/user_register_response';
 enum saltOrRounds {
     SALT = 10
 }
-enum Email {
-    FORM = "The Wonder Store",
-    SUBJECT = "Code verify your mail form TheWonderStore ✔",
-}
+
 
 
 
