@@ -1,8 +1,20 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Post, Put, Render, Res, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpStatus,
+    Param,
+    Post,
+    Render,
+    Res,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors
+} from "@nestjs/common";
 import { BannerService } from "./banner.service";
-import { BannerInsertDTO } from "./dto/banner_insert_request";
 import { Response } from "express";
-import { FileFieldsInterceptor, FileInterceptor } from "@nestjs/platform-express";
+import { FileInterceptor } from "@nestjs/platform-express";
 import { Types } from "mongoose";
 import { AuthenticatedGuard } from "src/auth/authWeb.guard";
 
@@ -16,40 +28,48 @@ export class BannerCpanelController {
     async quanlysanpham(@Res() res: Response) {
         try {
             const response = await this.bannerService.getAllBanner();
-            return { banner: response.banner };
+            return res.render('quanlybanner', { banner: response.banner });
         } catch (error) {
+            console.error(error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to fetch banners');
         }
     }
+
     @UseGuards(AuthenticatedGuard)
     @Get('addBanner')
     @Render('addBanner')
-    async AddBanner(@Res() res: Response) {
+    async addBannerPage(@Res() res: Response) {
         try {
-            return {};
+            return res.render('addBanner', {});
         } catch (error) {
-            return error;
+            console.error(error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to render add banner page');
         }
     }
+
     @UseInterceptors(FileInterceptor('image'))
     @Post('addBanner')
-    async addBanner(@Body() body: any, @UploadedFile() files: Express.Multer.File, @Res() res: Response) {
+    async addBanner(@Body() body: any, @UploadedFile() file: Express.Multer.File, @Res() res: Response) {
         try {
-            if (!files) {
-                return null;
+            if (!file) {
+                return res.status(HttpStatus.BAD_REQUEST).send('No file uploaded');
             }
-            await this.bannerService.addBanner({ body, files });
+            await this.bannerService.addBanner({ body, file });
             return res.redirect('/bannerCpanel/quanlybanner');
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).send('Failed to add banner');
         }
     }
+
     @Delete('deleteBanner/:_id')
-    async deleteBanner(@Param() _id: Types.ObjectId, @Res() res: Response) {
+    async deleteBanner(@Param('_id') _id: string, @Res() res: Response) {
         try {
-            await this.bannerService.deleteBanner(_id);
+            await this.bannerService.deleteBanner(new Types.ObjectId(_id));
             return res.json({ result: true });
         } catch (error) {
-            console.log(error);
+            console.error(error);
+            return res.status(HttpStatus.INTERNAL_SERVER_ERROR).json({ result: false, error: 'Failed to delete banner' });
         }
     }
 }

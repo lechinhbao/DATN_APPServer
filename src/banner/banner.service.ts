@@ -16,55 +16,57 @@ export class BannerService {
     async addBanner(requestDTO: any): Promise<BannerResponseDTO> {
         try {
             const body: BannerInsertDTO = requestDTO.body;
-            const files = requestDTO.files;
-            const url = await uploadImage(files, "Banner");
+            const file = requestDTO.file;
+            if (!file) {
+                throw new Error('No file uploaded');
+            }
+            const url = await uploadImage(file, "Banner");
             const { title } = body;
             const banner = new this.bannerModel({ title, image: url });
-            await banner.save()
+            await banner.save();
             return {
                 status: true,
-                message: 'Insert banner success' + banner,
+                message: 'Insert banner success: ' + banner,
             };
-
         } catch (error) {
             console.log(error);
             return {
                 status: false,
-                message: 'Update address failed',
-            }
+                message: 'Insert banner failed: ' + error.message,
+            };
         }
     }
+
     async getAllBanner(): Promise<BannerResponseDTO | any> {
         try {
-            const banner = await this.bannerModel.find();
+            const banners = await this.bannerModel.find();
             return {
                 status: true,
-                message: 'Get all banner success',
-                banner
-            }
+                message: 'Get all banners success',
+                banner: banners,
+            };
         } catch (error) {
             console.log(error);
             return {
                 status: false,
-                message: 'Get all banner failed',
-            }
+                message: 'Get all banners failed: ' + error.message,
+            };
         }
     }
+
     async deleteBanner(id: Types.ObjectId): Promise<BannerResponseDTO> {
         try {
-            const { _id } = id;
-
-            await this.bannerModel.findByIdAndDelete(_id);
+            await this.bannerModel.findByIdAndDelete(id);
             return {
                 status: true,
                 message: 'Delete banner success',
-            }
+            };
         } catch (error) {
             console.log(error);
             return {
                 status: false,
-                message: 'Delete banner failed',
-            }
+                message: 'Delete banner failed: ' + error.message,
+            };
         }
     }
 }
